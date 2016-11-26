@@ -1,6 +1,9 @@
 package re.ghesquie.taggedimageviewer;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageButton;
@@ -16,7 +19,7 @@ import com.squareup.picasso.Picasso;
 
 public class TagListAdapter extends FirebaseRecyclerAdapter<TagItem, TagListAdapter.ViewHolder> {
 
-    private TaggedImageView taggedView;
+    private Activity activity;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -25,12 +28,10 @@ public class TagListAdapter extends FirebaseRecyclerAdapter<TagItem, TagListAdap
         public TextView priceText;
         public TextView infoText;
         public TextView descText;
-        private final Context context;
 
         public ViewHolder(View v) {
             super(v);
 
-            context = v.getContext();
             imageView = (ImageButton) itemView.findViewById(R.id.tag_image);
             titleText = (TextView) itemView.findViewById(R.id.tag_title_text);
             priceText = (TextView) itemView.findViewById(R.id.tag_price_text);
@@ -39,21 +40,24 @@ public class TagListAdapter extends FirebaseRecyclerAdapter<TagItem, TagListAdap
         }
     }
 
-    public TagListAdapter (DatabaseReference ref, TaggedImageView view){
+    public TagListAdapter (DatabaseReference ref, Activity act){
         super(TagItem.class, R.layout.tag_recycler_view_item, TagListAdapter.ViewHolder.class, ref);
-        taggedView = view;
+        activity = act;
     }
 
     @Override
-    protected void populateViewHolder(TagListAdapter.ViewHolder holder, TagItem model, int position) {
+    protected void populateViewHolder(TagListAdapter.ViewHolder holder, final TagItem model, int position) {
         Picasso.with(holder.imageView.getContext()).load(model.image).into(holder.imageView);
+        holder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(model.link));
+                activity.startActivity(browserIntent);
+            }
+        });
         holder.titleText.setText(model.title);
         holder.priceText.setText(model.price);
         holder.infoText.setText(model.info);
         holder.descText.setText(model.desc);
-
-        // Might have issues getting added multiple times.
-        taggedView.tags.add(position, model);
-        taggedView.invalidate();
     }
 }

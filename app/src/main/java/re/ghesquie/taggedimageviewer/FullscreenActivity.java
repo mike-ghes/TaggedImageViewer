@@ -2,18 +2,17 @@ package re.ghesquie.taggedimageviewer;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.widget.RecyclerView;
-import android.widget.ImageView;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -82,7 +81,6 @@ public class FullscreenActivity extends AppCompatActivity {
     };
     private boolean mVisible;
     private RecyclerView mTagList;
-    TagListAdapter adapter;
 
     private final Runnable mHideRunnable = new Runnable() {
         @Override
@@ -113,9 +111,13 @@ public class FullscreenActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_fullscreen);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = (TaggedImageView) findViewById(R.id.fullscreen_content);
+        mContentView.drawTags = true;
 
         if (value != -1) {
             final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("rooms").child(value.toString());
@@ -133,13 +135,45 @@ public class FullscreenActivity extends AppCompatActivity {
             });
         }
         mTagList = (RecyclerView) findViewById(R.id.tag_list);
-
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mTagList.setLayoutManager(layoutManager);
 
+        mContentView.listView = mTagList;
+
         DatabaseReference tagRef = FirebaseDatabase.getInstance().getReference().child("rooms").child(value.toString()).child("tags");
-        adapter = new TagListAdapter(tagRef, mContentView);
-        mTagList.setAdapter(adapter);
+        mTagList.setAdapter(new TagListAdapter(tagRef, this));
+        tagRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                TagItem tag = dataSnapshot.getValue(TagItem.class);
+                mContentView.tags.add(tag);
+                mContentView.invalidate();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                TagItem tag = dataSnapshot.getValue(TagItem.class);
+                mContentView.tags.set(mContentView.tags.indexOf(tag), tag);
+                mContentView.invalidate();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                TagItem tag = dataSnapshot.getValue(TagItem.class);
+                mContentView.tags.remove(tag);
+                mContentView.invalidate();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -153,6 +187,13 @@ public class FullscreenActivity extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         findViewById(R.id.tag_list).setOnTouchListener(mDelayHideTouchListener);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent myIntent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivityForResult(myIntent, 0);
+        return true;
+
     }
 
     @Override
@@ -184,6 +225,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 .alpha(0)
                 .setDuration(UI_ANIMATION_DELAY);
         mVisible = false;
+        mContentView.drawTags = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
@@ -196,6 +238,7 @@ public class FullscreenActivity extends AppCompatActivity {
         mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mVisible = true;
+        mContentView.drawTags = true;
 
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);

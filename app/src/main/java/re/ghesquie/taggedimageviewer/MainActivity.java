@@ -1,20 +1,15 @@
 package re.ghesquie.taggedimageviewer;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
-
-    DatabaseReference itemRef;
-    MainListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,27 +18,12 @@ public class MainActivity extends AppCompatActivity {
 
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        //StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        //layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-
-        itemRef = FirebaseDatabase.getInstance().getReference().child("rooms");
-
-        adapter = new MainListAdapter(itemRef);
-//
-//        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-////            @Override
-////            public void onItemRangeInserted(int positionStart, int itemCount) {
-////                //addBar.setExpanded(false);
-////            }
-//        });
-        recyclerView.setAdapter(adapter);
+        DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference().child("rooms");
+        recyclerView.setAdapter(new MainListAdapter(itemRef));
     }
-//
-//
-//    public void openRoom(View v) {
-//        Intent myIntent = new Intent(MainActivity.this, FullscreenActivity.class);
-//        myIntent.putExtra("key", adapter.getAdapterPosition()); //Optional parameters
-//        MainActivity.this.startActivity(myIntent);
-//    }
 }
