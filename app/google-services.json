@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "438677321569",
+    "firebase_url": "https://taggedimageviewer.firebaseio.com",
+    "project_id": "taggedimageviewer",
+    "storage_bucket": "taggedimageviewer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:438677321569:android:913ab4b7f4b0387f",
+        "android_client_info": {
+          "package_name": "re.ghesquie.taggedimageviewer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "438677321569-tkvc7umffhum4a9el96m7of1kef46nao.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8jX4dAXRsz2q8GO3hJIQ2n0S9pdhsDZA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
