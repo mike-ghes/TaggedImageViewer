@@ -153,8 +153,11 @@ public class FullscreenActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 TagItem tag = dataSnapshot.getValue(TagItem.class);
-                mContentView.tags.set(mContentView.tags.indexOf(tag), tag);
-                mContentView.invalidate();
+                int index = mContentView.tags.indexOf(tag);
+                if (index != -1) {
+                    mContentView.tags.set(index, tag);
+                    mContentView.invalidate();
+                }
             }
 
             @Override
